@@ -22,12 +22,13 @@ type
     FOutFile: TextFile;
     FQuietMode: Boolean;
     FQuietTypes: set of TLogTypes;
+    ExeName : string;
     procedure Initialize;
     procedure CreateFoldersIfNecessary;
     procedure Finalize;
     procedure Write(const Msg: string);
   public
-    constructor Create(const FileName: string);
+    constructor Create(const FileName, ExePath : string);
     destructor Destroy; override;
 
     property FileName: string read FFileName;
@@ -58,13 +59,13 @@ type
     procedure Fatal(const Msg: string);
   end;
 
-var
-  Logger: TLogger;
+//var
+  //Logger: TLogger;
 
 implementation
 
 uses
-  Forms,
+  //Forms,
   SysUtils,
   Windows;
 
@@ -92,14 +93,15 @@ begin
   FIsInit := False;
 end;
 
-constructor TLogger.Create(const FileName: string);
+constructor TLogger.Create(const FileName, ExePath : string);
 begin
   FFileName := FileName;
   FIsInit := False;
   Self.SetNoisyMode;
   FQuietTypes := [];
+  ExeName := Exepath;
 end;
- 
+
 procedure TLogger.CreateFoldersIfNecessary;
 var
   FilePath: string;
@@ -110,7 +112,7 @@ begin
   if Pos(':', FilePath) > 0 then
     ForceDirectories(FilePath)
   else begin
-    FullApplicationPath := ExtractFilePath(Application.ExeName);
+    FullApplicationPath := ExtractFilePath(ExeName);
     ForceDirectories(IncludeTrailingPathDelimiter(FullApplicationPath) + FilePath);
   end;
 end;
@@ -118,8 +120,8 @@ end;
 procedure TLogger.Debug(const Msg: string);
 begin
   {$WARN SYMBOL_PLATFORM OFF}
-  if DebugHook = 0 then
-    Exit;
+  //if DebugHook = 0 then
+  //  Exit;
   {$WARN SYMBOL_PLATFORM ON}
 
   if not (ltDebug in FQuietTypes) then
@@ -131,7 +133,7 @@ begin
   Self.Finalize;
   inherited;
 end;
- 
+
 procedure TLogger.DisableDebugLog;
 begin
   Include(FQuietTypes, ltDebug);
@@ -211,7 +213,7 @@ begin
 
   FIsInit := False;
 end;
- 
+
 procedure TLogger.Initialize;
 begin
   if FIsInit then
@@ -220,7 +222,7 @@ begin
   if not FQuietMode then
   begin
     Self.CreateFoldersIfNecessary;
-    
+
     AssignFile(FOutFile, FFileName);
     if not FileExists(FFileName) then
       Rewrite(FOutFile)
@@ -230,23 +232,23 @@ begin
 
   FIsInit := True;
 end;
- 
+
 procedure TLogger.Info(const Msg: string);
 begin
   if not (ltInfo in FQuietTypes) then
     Self.Write(Format(FORMAT_LOG, [PREFIX_INFO, Msg]));
 end;
- 
+
 procedure TLogger.SetNoisyMode;
 begin
   FQuietMode := False;
 end;
- 
+
 procedure TLogger.SetQuietMode;
 begin
   FQuietMode := True;
 end;
- 
+
 procedure TLogger.Trace(const Msg: string);
 begin
   if not (ltTrace in FQuietTypes) then
@@ -258,7 +260,7 @@ begin
   if not (ltWarning in FQuietTypes) then
     Self.Write(Format(FORMAT_LOG, [PREFIX_WARN, Msg]));
 end;
- 
+
 procedure TLogger.Write(const Msg: string);
 const
   FORMAT_DATETIME_DEFAULT = 'yyyy-mm-dd hh:nn:ss';
@@ -274,11 +276,5 @@ begin
     Self.Finalize;
   end;
 end;
-
-initialization
-  Logger := TLogger.Create('Log.txt');
-
-finalization
-  Logger.Free;
 
 end.
