@@ -8,6 +8,14 @@ Log4Pascal is NOT based on the Log4J package from the Apache Software Foundation
 
 Just add the unit `Log4Pascal.pas` to project.
   - ``Project -> Add to Project`` and then locate and choose the file.
+  
+To create a logger object, use:
+```
+Logger := TLogger.Create('log.txt', Application.ExeName);
+```
+where the first argument of the constructor is the file name and the second one is the path where the file should be stored.
+
+At the end of the programm call `Logger.Free;` to free up the memory.
 
 ### Log file
 
