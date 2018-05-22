@@ -70,7 +70,7 @@ uses
   Windows;
 
 const
-  FORMAT_LOG = '%s %s';
+  FORMAT_LOG = '%s: %s';
   PREFIX_TRACE = 'TRACE';
   PREFIX_DEBUG = 'DEBUG';
   PREFIX_INFO  = 'INFO ';
@@ -109,8 +109,10 @@ var
 begin
   FilePath := ExtractFilePath(FFileName);
 
-  if Pos(':', FilePath) > 0 then
-    ForceDirectories(FilePath)
+  if (Pos(':', FilePath) > 0) or (Pos('\\', FilePath) > 0 ) then
+  begin
+    ForceDirectories(FilePath);
+  end
   else begin
     FullApplicationPath := ExtractFilePath(ExeName);
     ForceDirectories(IncludeTrailingPathDelimiter(FullApplicationPath) + FilePath);
@@ -271,10 +273,17 @@ begin
   Self.Initialize;
   try
     if FIsInit then
-      Writeln(FOutFile, Format('%s [%s]', [Msg, FormatDateTime(FORMAT_DATETIME_DEFAULT, Now)]));
+      Writeln(FOutFile, Format('%s: %s', [FormatDateTime(FORMAT_DATETIME_DEFAULT, Now), Msg]));
   finally
     Self.Finalize;
   end;
 end;
+
+//initialization
+//  Logger := TLogger.Create('Log.txt');
+//  Exepath := '';
+
+//finalization
+//  Logger.Free;
 
 end.
